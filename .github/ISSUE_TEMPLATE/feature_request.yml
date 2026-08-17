@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest a new sensor or capability
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please note two deliberate design limits before requesting a feature:
+
+        - The integration is **read-only**: it only ever issues HTTP GET, because
+          the CDM API exposes unauthenticated destructive endpoints.
+        - The integration is **anonymous**: it never asks for the EWS password,
+          so authenticated endpoints (job history in particular, which leaks
+          printed file names and user names) are out of scope.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: >-
+        If it involves a CDM endpoint, give its path and, if you can, the JSON
+        it returns on your printer (`curl -k https://<printer>/cdm/...`).
+    validations:
+      required: true
+
+  - type: input
+    id: printer_model
+    attributes:
+      label: Printer model
+      placeholder: HP Color LaserJet Pro MFP 3302

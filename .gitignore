@@ -1,0 +1,41 @@
+# --- Python ---------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- Packaging artifacts --------------------------------------------------
+hp_cdm.zip
+
+# --- macOS ----------------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# --- JetBrains ------------------------------------------------------------
+.idea/
+*.iml
+*.iws
+out/
+
+# --- Editors --------------------------------------------------------------
+.vscode/
+*.swp

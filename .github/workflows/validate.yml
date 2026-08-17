@@ -1,0 +1,36 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Weekly, so a breaking change in Home Assistant or HACS shows up before
+    # a user hits it.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  hassfest:
+    name: Hassfest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    name: HACS
+    runs-on: ubuntu-latest
+    # The action reads the repository through the GitHub API, so it needs
+    # neither a checkout nor any token permission.
+    permissions: {}
+    steps:
+      - name: HACS validation
+        uses: hacs/action@main
+        with:
+          category: integration
+          # The brands check requires the domain to be present in
+          # home-assistant/brands, which is only mandatory for a submission to
+          # the default HACS store. Drop this once hp_cdm is merged there.
+          ignore: brands

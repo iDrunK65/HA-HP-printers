@@ -1,0 +1,69 @@
+name: Bug report
+description: Report a problem with the HP Printer (CDM) integration
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+        Before opening an issue, please download the diagnostics of your printer
+        device (Settings → Devices & services → HP Printer (CDM) → the three dots
+        → Download diagnostics). Serial numbers, hostnames and UUIDs are redacted
+        automatically.
+
+  - type: input
+    id: printer_model
+    attributes:
+      label: Printer model
+      placeholder: HP Color LaserJet Pro MFP 3302
+    validations:
+      required: true
+
+  - type: input
+    id: firmware
+    attributes:
+      label: Printer firmware version
+      placeholder: 6.28.3.30-202606111700
+    validations:
+      required: true
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+      placeholder: "2026.8.0"
+    validations:
+      required: true
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: Integration version
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: >-
+        Enable debug logging for `custom_components.hp_cdm` and paste the
+        relevant lines. They are formatted automatically.
+      render: text
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Paste or attach the downloaded diagnostics file.
+      render: json

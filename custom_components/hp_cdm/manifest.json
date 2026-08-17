@@ -1,0 +1,13 @@
+{
+  "domain": "hp_cdm",
+  "name": "HP Printer (CDM)",
+  "codeowners": ["@iDrunK65"],
+  "config_flow": true,
+  "documentation": "https://github.com/iDrunK65/HA-HP-printers",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/iDrunK65/HA-HP-printers/issues",
+  "requirements": [],
+  "version": "1.0.0",
+  "zeroconf": ["_ipp._tcp.local."]
+}

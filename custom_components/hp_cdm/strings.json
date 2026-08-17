@@ -1,0 +1,151 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "HP printer (CDM)",
+        "description": "Enter the address of your HP printer. No password is needed: this integration only reads the anonymous part of the local CDM API.",
+        "data": {
+          "host": "Host"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the printer. HTTPS with a self-signed certificate is used automatically."
+        }
+      },
+      "discovery_confirm": {
+        "title": "HP printer (CDM)",
+        "description": "Do you want to add {name} ({host})?"
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the printer. Check the address and that the printer is powered on.",
+      "not_supported": "This device answered but does not expose the CDM API. Older HP firmwares use the /DevMgmt interface instead, which this integration does not support.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This printer is already configured",
+      "cannot_connect": "Failed to connect to the printer",
+      "not_hp": "This discovered printer is not an HP device",
+      "not_supported": "This printer does not expose the CDM API"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "problem": {
+        "name": "Problem"
+      },
+      "connectivity": {
+        "name": "Connectivity"
+      }
+    },
+    "sensor": {
+      "impressions_total": {
+        "name": "Total impressions"
+      },
+      "impressions_mono": {
+        "name": "Monochrome impressions"
+      },
+      "impressions_color": {
+        "name": "Colour impressions"
+      },
+      "impressions_blank": {
+        "name": "Blank sides"
+      },
+      "print_impressions": {
+        "name": "Print impressions"
+      },
+      "copy_impressions": {
+        "name": "Copy impressions"
+      },
+      "fax_impressions": {
+        "name": "Received fax impressions"
+      },
+      "sheets_total": {
+        "name": "Sheets"
+      },
+      "sheets_simplex": {
+        "name": "Single-sided sheets"
+      },
+      "sheets_duplex": {
+        "name": "Double-sided sheets"
+      },
+      "scan_total": {
+        "name": "Scanned images"
+      },
+      "scan_send": {
+        "name": "Sent scan images"
+      },
+      "scan_copy": {
+        "name": "Copy scan images"
+      },
+      "scan_adf": {
+        "name": "ADF scan images"
+      },
+      "scan_fax": {
+        "name": "Fax scan images"
+      },
+      "jobs_print": {
+        "name": "Print jobs"
+      },
+      "jobs_copy": {
+        "name": "Copy jobs"
+      },
+      "jobs_email": {
+        "name": "Email jobs"
+      },
+      "jobs_network_folder": {
+        "name": "Network folder jobs"
+      },
+      "jobs_fax_sent": {
+        "name": "Sent fax jobs"
+      },
+      "jobs_fax_received": {
+        "name": "Received fax jobs"
+      },
+      "color_ratio": {
+        "name": "Colour ratio"
+      },
+      "duplex_ratio": {
+        "name": "Duplex ratio"
+      },
+      "printer_status": {
+        "name": "Printer status"
+      },
+      "alert_status": {
+        "name": "Alert status",
+        "state": {
+          "ok": "OK",
+          "warning": "Warning",
+          "error": "Error"
+        }
+      },
+      "alert_count": {
+        "name": "Active alerts"
+      },
+      "power_cycle_count": {
+        "name": "Power cycles"
+      },
+      "available_memory": {
+        "name": "Available memory"
+      },
+      "sleep_timeout": {
+        "name": "Sleep timeout"
+      },
+      "supply_k": {
+        "name": "Black cartridge"
+      },
+      "supply_c": {
+        "name": "Cyan cartridge"
+      },
+      "supply_m": {
+        "name": "Magenta cartridge"
+      },
+      "supply_y": {
+        "name": "Yellow cartridge"
+      },
+      "supply_generic": {
+        "name": "Cartridge slot {slot}"
+      }
+    }
+  }
+}

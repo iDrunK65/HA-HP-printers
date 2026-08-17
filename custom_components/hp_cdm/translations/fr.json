@@ -1,0 +1,151 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Imprimante HP (CDM)",
+        "description": "Saisissez l'adresse de votre imprimante HP. Aucun mot de passe n'est nécessaire : cette intégration ne lit que la partie anonyme de l'API locale CDM.",
+        "data": {
+          "host": "Hôte"
+        },
+        "data_description": {
+          "host": "Adresse IP ou nom d'hôte de l'imprimante. Le HTTPS avec certificat auto-signé est géré automatiquement."
+        }
+      },
+      "discovery_confirm": {
+        "title": "Imprimante HP (CDM)",
+        "description": "Voulez-vous ajouter {name} ({host}) ?"
+      }
+    },
+    "error": {
+      "cannot_connect": "Connexion à l'imprimante impossible. Vérifiez l'adresse et que l'imprimante est allumée.",
+      "not_supported": "Cet appareil répond mais n'expose pas l'API CDM. Les firmwares HP plus anciens utilisent l'interface /DevMgmt, qui n'est pas prise en charge par cette intégration.",
+      "unknown": "Erreur inattendue"
+    },
+    "abort": {
+      "already_configured": "Cette imprimante est déjà configurée",
+      "cannot_connect": "Connexion à l'imprimante impossible",
+      "not_hp": "L'imprimante découverte n'est pas un appareil HP",
+      "not_supported": "Cette imprimante n'expose pas l'API CDM"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "problem": {
+        "name": "Problème"
+      },
+      "connectivity": {
+        "name": "Connectivité"
+      }
+    },
+    "sensor": {
+      "impressions_total": {
+        "name": "Impressions totales"
+      },
+      "impressions_mono": {
+        "name": "Impressions monochromes"
+      },
+      "impressions_color": {
+        "name": "Impressions couleur"
+      },
+      "impressions_blank": {
+        "name": "Faces blanches"
+      },
+      "print_impressions": {
+        "name": "Impressions (impression)"
+      },
+      "copy_impressions": {
+        "name": "Impressions (copie)"
+      },
+      "fax_impressions": {
+        "name": "Impressions (fax reçu)"
+      },
+      "sheets_total": {
+        "name": "Feuilles"
+      },
+      "sheets_simplex": {
+        "name": "Feuilles recto"
+      },
+      "sheets_duplex": {
+        "name": "Feuilles recto verso"
+      },
+      "scan_total": {
+        "name": "Images numérisées"
+      },
+      "scan_send": {
+        "name": "Images numérisées (envoi)"
+      },
+      "scan_copy": {
+        "name": "Images numérisées (copie)"
+      },
+      "scan_adf": {
+        "name": "Images numérisées (chargeur ADF)"
+      },
+      "scan_fax": {
+        "name": "Images numérisées (fax)"
+      },
+      "jobs_print": {
+        "name": "Travaux d'impression"
+      },
+      "jobs_copy": {
+        "name": "Travaux de copie"
+      },
+      "jobs_email": {
+        "name": "Travaux e-mail"
+      },
+      "jobs_network_folder": {
+        "name": "Travaux dossier réseau"
+      },
+      "jobs_fax_sent": {
+        "name": "Travaux fax envoyés"
+      },
+      "jobs_fax_received": {
+        "name": "Travaux fax reçus"
+      },
+      "color_ratio": {
+        "name": "Taux de couleur"
+      },
+      "duplex_ratio": {
+        "name": "Taux de recto verso"
+      },
+      "printer_status": {
+        "name": "État de l'imprimante"
+      },
+      "alert_status": {
+        "name": "État des alertes",
+        "state": {
+          "ok": "OK",
+          "warning": "Avertissement",
+          "error": "Erreur"
+        }
+      },
+      "alert_count": {
+        "name": "Alertes actives"
+      },
+      "power_cycle_count": {
+        "name": "Cycles d'alimentation"
+      },
+      "available_memory": {
+        "name": "Mémoire disponible"
+      },
+      "sleep_timeout": {
+        "name": "Délai de mise en veille"
+      },
+      "supply_k": {
+        "name": "Cartouche noire"
+      },
+      "supply_c": {
+        "name": "Cartouche cyan"
+      },
+      "supply_m": {
+        "name": "Cartouche magenta"
+      },
+      "supply_y": {
+        "name": "Cartouche jaune"
+      },
+      "supply_generic": {
+        "name": "Cartouche emplacement {slot}"
+      }
+    }
+  }
+}

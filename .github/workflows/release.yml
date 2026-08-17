@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set manifest version from tag
+        env:
+          # Passed through the environment rather than interpolated into the
+          # shell, so the tag name can never be injected as a command.
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG_NAME#v}"
+          jq --arg version "$VERSION" '.version = $version' \
+            custom_components/hp_cdm/manifest.json > manifest.tmp
+          mv manifest.tmp custom_components/hp_cdm/manifest.json
+
+      - name: Build the HACS zip
+        # HACS expects the integration files at the root of the archive.
+        run: |
+          cd custom_components/hp_cdm
+          zip -r "${GITHUB_WORKSPACE}/hp_cdm.zip" .
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: hp_cdm.zip
+          generate_release_notes: true

@@ -1,0 +1,7 @@
+{
+  "name": "HP Printer (CDM)",
+  "homeassistant": "2026.8.0",
+  "render_readme": true,
+  "zip_release": true,
+  "filename": "hp_cdm.zip"
+}
