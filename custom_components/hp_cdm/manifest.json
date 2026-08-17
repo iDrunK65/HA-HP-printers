@@ -10,7 +10,7 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/iDrunK65/HA-HP-printers/issues",
   "requirements": [],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "zeroconf": [
     "_ipp._tcp.local."
   ]

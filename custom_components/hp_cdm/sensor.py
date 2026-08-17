@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -40,6 +40,12 @@ class HpCdmSensorEntityDescription(SensorEntityDescription):
 
     value_fn: Callable[[dict[str, Any]], StateType]
     attributes_fn: Callable[[dict[str, Any]], dict[str, Any]] | None = None
+    # Icons are set here rather than in an icons.json: icon translations are
+    # resolved by the frontend, which caches them per integration in a module
+    # level variable that survives a Home Assistant restart. An icon on the
+    # entity ends up in the state attributes, which take priority over that
+    # whole path and cannot go stale.
+    state_icons: Mapping[str, str] | None = None
 
 
 def _ratio(numerator: Any, denominator: Any) -> float | None:
@@ -57,12 +63,14 @@ def _usage(
     key: str,
     *path: str,
     unit: str,
+    icon: str,
     enabled: bool = True,
 ) -> HpCdmSensorEntityDescription:
     """Build a lifetime-counter sensor description."""
     return HpCdmSensorEntityDescription(
         key=key,
         translation_key=key,
+        icon=icon,
         native_unit_of_measurement=unit,
         state_class=SensorStateClass.TOTAL_INCREASING,
         entity_registry_enabled_default=enabled,
@@ -78,16 +86,20 @@ def _usage(
 # static flag is used rather than runtime detection, so the entity set stays
 # predictable across restarts.
 USAGE_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
-    _usage("impressions_total", "printUsage", "impressions", "total", unit=UNIT_PAGES),
+    _usage("impressions_total", "printUsage", "impressions", "total", icon="mdi:printer",
+        unit=UNIT_PAGES),
     _usage(
-        "impressions_mono", "printUsage", "impressions", "monochrome", unit=UNIT_PAGES
+        "impressions_mono", "printUsage", "impressions", "monochrome", icon="mdi:invert-colors-off",
+        unit=UNIT_PAGES
     ),
-    _usage("impressions_color", "printUsage", "impressions", "color", unit=UNIT_PAGES),
+    _usage("impressions_color", "printUsage", "impressions", "color", icon="mdi:invert-colors",
+        unit=UNIT_PAGES),
     _usage(
         "impressions_blank",
         "printUsage",
         "impressions",
         "blankSides",
+        icon="mdi:file-outline",
         unit=UNIT_PAGES,
         enabled=False,
     ),
@@ -96,50 +108,68 @@ USAGE_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
         "printUsage",
         "printOtherImpressions",
         "total",
+        icon="mdi:printer-outline",
         unit=UNIT_PAGES,
     ),
     _usage(
-        "copy_impressions", "printUsage", "copyImpressions", "total", unit=UNIT_PAGES
+        "copy_impressions", "printUsage", "copyImpressions", "total", icon="mdi:content-copy",
+        unit=UNIT_PAGES
     ),
     _usage(
         "fax_impressions",
         "printUsage",
         "faxInImpressions",
         "total",
+        icon="mdi:fax",
         unit=UNIT_PAGES,
         enabled=False,
     ),
-    _usage("sheets_total", "printUsage", "sheets", "total", unit=UNIT_SHEETS),
-    _usage("sheets_simplex", "printUsage", "sheets", "simplex", unit=UNIT_SHEETS),
-    _usage("sheets_duplex", "printUsage", "sheets", "duplex", unit=UNIT_SHEETS),
-    _usage("scan_total", "scanUsage", "totalImages", unit=UNIT_IMAGES),
-    _usage("scan_send", "scanUsage", "sendImages", unit=UNIT_IMAGES),
-    _usage("scan_copy", "scanUsage", "copyImages", unit=UNIT_IMAGES),
-    _usage("scan_adf", "scanUsage", "adfImages", unit=UNIT_IMAGES),
-    _usage("scan_fax", "scanUsage", "faxImages", unit=UNIT_IMAGES, enabled=False),
-    _usage("jobs_print", "jobUsage", "printJobCount", unit=UNIT_JOBS),
-    _usage("jobs_copy", "jobUsage", "copyJobCount", unit=UNIT_JOBS),
-    _usage("jobs_email", "jobUsage", "emailJobCount", unit=UNIT_JOBS),
+    _usage("sheets_total", "printUsage", "sheets", "total", icon="mdi:file-document-multiple-outline",
+        unit=UNIT_SHEETS),
+    _usage("sheets_simplex", "printUsage", "sheets", "simplex", icon="mdi:file-document-outline",
+        unit=UNIT_SHEETS),
+    _usage("sheets_duplex", "printUsage", "sheets", "duplex", icon="mdi:book-open-page-variant-outline",
+        unit=UNIT_SHEETS),
+    _usage("scan_total", "scanUsage", "totalImages", icon="mdi:scanner",
+        unit=UNIT_IMAGES),
+    _usage("scan_send", "scanUsage", "sendImages", icon="mdi:send-outline",
+        unit=UNIT_IMAGES),
+    _usage("scan_copy", "scanUsage", "copyImages", icon="mdi:image-multiple-outline",
+        unit=UNIT_IMAGES),
+    _usage("scan_adf", "scanUsage", "adfImages", icon="mdi:tray-full",
+        unit=UNIT_IMAGES),
+    _usage("scan_fax", "scanUsage", "faxImages", icon="mdi:fax",
+        unit=UNIT_IMAGES, enabled=False),
+    _usage("jobs_print", "jobUsage", "printJobCount", icon="mdi:printer-check",
+        unit=UNIT_JOBS),
+    _usage("jobs_copy", "jobUsage", "copyJobCount", icon="mdi:content-copy",
+        unit=UNIT_JOBS),
+    _usage("jobs_email", "jobUsage", "emailJobCount", icon="mdi:email-outline",
+        unit=UNIT_JOBS),
     _usage(
         "jobs_network_folder",
         "jobUsage",
         "networkFolderJobCount",
+        icon="mdi:folder-network-outline",
         unit=UNIT_JOBS,
         enabled=False,
     ),
     _usage(
-        "jobs_fax_sent", "jobUsage", "sendFaxJobCount", unit=UNIT_JOBS, enabled=False
+        "jobs_fax_sent", "jobUsage", "sendFaxJobCount", icon="mdi:fax",
+        unit=UNIT_JOBS, enabled=False
     ),
     _usage(
         "jobs_fax_received",
         "jobUsage",
         "receiveFaxJobCount",
+        icon="mdi:fax",
         unit=UNIT_JOBS,
         enabled=False,
     ),
     HpCdmSensorEntityDescription(
         key="color_ratio",
         translation_key="color_ratio",
+        icon="mdi:palette",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=1,
@@ -151,6 +181,7 @@ USAGE_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
     HpCdmSensorEntityDescription(
         key="duplex_ratio",
         translation_key="duplex_ratio",
+        icon="mdi:content-duplicate",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=1,
@@ -167,6 +198,7 @@ STATUS_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
     HpCdmSensorEntityDescription(
         key="printer_status",
         translation_key="printer_status",
+        icon="mdi:printer-settings",
         # No device_class ENUM here: the firmware documents no closed list of
         # states, and "inPowerSave" is a perfectly healthy one.
         value_fn=lambda data: nested_get(data, DATA_STATUS, "status"),
@@ -174,6 +206,12 @@ STATUS_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
     HpCdmSensorEntityDescription(
         key="alert_status",
         translation_key="alert_status",
+        icon="mdi:alert-box-outline",
+        state_icons={
+            "ok": "mdi:check-circle-outline",
+            "warning": "mdi:alert-outline",
+            "error": "mdi:alert-circle",
+        },
         device_class=SensorDeviceClass.ENUM,
         options=["ok", "warning", "error"],
         value_fn=lambda data: alert_status(parse_alerts(data.get(DATA_ALERTS))),
@@ -186,6 +224,7 @@ STATUS_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
     HpCdmSensorEntityDescription(
         key="alert_count",
         translation_key="alert_count",
+        icon="mdi:counter",
         native_unit_of_measurement=UNIT_ALERTS,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data: len(parse_alerts(data.get(DATA_ALERTS))),
@@ -193,6 +232,7 @@ STATUS_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
     HpCdmSensorEntityDescription(
         key="power_cycle_count",
         translation_key="power_cycle_count",
+        icon="mdi:restart",
         state_class=SensorStateClass.TOTAL_INCREASING,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
@@ -201,6 +241,7 @@ STATUS_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
     HpCdmSensorEntityDescription(
         key="available_memory",
         translation_key="available_memory",
+        icon="mdi:memory",
         device_class=SensorDeviceClass.DATA_SIZE,
         native_unit_of_measurement=UnitOfInformation.KILOBYTES,
         state_class=SensorStateClass.MEASUREMENT,
@@ -215,6 +256,7 @@ STATUS_SENSORS: tuple[HpCdmSensorEntityDescription, ...] = (
     HpCdmSensorEntityDescription(
         key="sleep_timeout",
         translation_key="sleep_timeout",
+        icon="mdi:sleep",
         native_unit_of_measurement=UnitOfTime.MINUTES,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
@@ -293,6 +335,15 @@ class HpCdmSensor(HpCdmEntity, SensorEntity):
         return super().available and self.native_value is not None
 
     @property
+    def icon(self) -> str | None:
+        """Return an icon, preferring one matching the current state."""
+        if (state_icons := self.entity_description.state_icons) and (
+            icon := state_icons.get(str(self.native_value))
+        ):
+            return icon
+        return super().icon
+
+    @property
     def native_value(self) -> StateType:
         """Return the sensor value."""
         if self.coordinator.data is None:
@@ -312,6 +363,7 @@ class HpCdmSupplySensor(HpCdmEntity, SensorEntity):
 
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:water"
 
     def __init__(
         self,
