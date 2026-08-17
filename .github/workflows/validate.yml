@@ -9,8 +9,25 @@ on:
     - cron: "0 4 * * 1"
   workflow_dispatch:
 
+# Deny by default, as in the HACS example; the hassfest job opts back into the
+# read access its checkout needs.
+permissions: {}
+
 jobs:
-  hassfest:
+  validate-hacs:
+    name: HACS
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+          # Documented ignorable check. The brands check requires the domain to
+          # exist in home-assistant/brands, which is only mandatory to submit to
+          # the default HACS store. Drop this once hp_cdm is merged there.
+          ignore: "brands"
+
+  validate-hassfest:
     name: Hassfest
     runs-on: ubuntu-latest
     permissions:
@@ -18,19 +35,3 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: home-assistant/actions/hassfest@master
-
-  hacs:
-    name: HACS
-    runs-on: ubuntu-latest
-    # The action reads the repository through the GitHub API, so it needs
-    # neither a checkout nor any token permission.
-    permissions: {}
-    steps:
-      - name: HACS validation
-        uses: hacs/action@main
-        with:
-          category: integration
-          # The brands check requires the domain to be present in
-          # home-assistant/brands, which is only mandatory for a submission to
-          # the default HACS store. Drop this once hp_cdm is merged there.
-          ignore: brands
