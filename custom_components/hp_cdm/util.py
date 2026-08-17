@@ -58,11 +58,11 @@ _CATEGORY_LABELS: dict[str, str] = {
 
 _CAMEL_BOUNDARY = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
 
-# /cdm/system/v1/identity has never been observed on real hardware, so its
-# schema is unknown. Instead of assuming one, probe for any of the key names HP
-# uses elsewhere in the CDM tree. The bare "version" key is deliberately absent
-# from these lists: every CDM payload carries one and it holds the *schema*
-# version, not the firmware version.
+# Key names to probe for device identity. Confirmed against a Color LaserJet
+# Pro MFP 3302 (firmware 6.28.3.30), plus the variants HP uses elsewhere in the
+# CDM tree so other models still resolve. The bare "version" key is
+# deliberately absent from these lists: every CDM payload carries one and it
+# holds the *schema* version, not the firmware version.
 IDENTITY_MODEL_KEYS: tuple[str, ...] = (
     "makeAndModel",
     "makeAndModelBase",
@@ -81,6 +81,17 @@ IDENTITY_FIRMWARE_KEYS: tuple[str, ...] = (
     "fwVersion",
     "currentFirmwareVersion",
 )
+# The SKU identifies the exact variant (for example "3302fdn"), which the
+# model name alone does not convey; the product number is the orderable
+# reference and makes a reasonable second choice.
+IDENTITY_MODEL_ID_KEYS: tuple[str, ...] = ("skuIdentifier", "productNumber")
+
+# Not every CDM field is a scalar. identity reports the model as
+#   "makeAndModel": {"base": ..., "family": ..., "name": ...}
+# so a match on the right key can still hand back an object. Unwrap those
+# through the sub-keys HP uses, "base" first because "family" would widen a
+# single model into a whole product range.
+_UNWRAP_KEYS: tuple[str, ...] = ("base", "name", "value", "seValue")
 
 
 def nested_get(data: Any, *keys: str, default: Any = None) -> Any:
@@ -120,17 +131,29 @@ def humanize(value: Any) -> str | None:
     return spaced[0].upper() + spaced[1:].lower() if len(spaced) > 1 else spaced
 
 
+def as_scalar(value: Any) -> str | int | float | None:
+    """Reduce a CDM value to a scalar, unwrapping object wrappers."""
+    # bool is a subclass of int, and a flag is never an identity value.
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (str, int, float)) and str(value).strip():
+        return value
+    if isinstance(value, dict):
+        for key in _UNWRAP_KEYS:
+            if (found := as_scalar(value.get(key))) is not None:
+                return found
+    return None
+
+
 def find_value(data: Any, keys: tuple[str, ...]) -> Any:
     """Depth-first search for the first of ``keys`` present in ``data``.
 
-    ``/cdm/system/v1/identity`` has never been observed, so its schema is
-    unknown; this walks whatever it returns looking for plausible key names
-    instead of assuming a shape.
+    Models differ in where they put things, so this walks whatever the printer
+    returns looking for plausible key names instead of assuming a shape.
     """
     if isinstance(data, dict):
         for key in keys:
-            value = data.get(key)
-            if isinstance(value, (str, int, float)) and str(value).strip():
+            if (value := as_scalar(data.get(key))) is not None:
                 return value
         for value in data.values():
             found = find_value(value, keys)

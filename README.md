@@ -144,11 +144,36 @@ settings if your printer actually uses them.
 - Cartridges are enumerated at setup. Fitting a cartridge into a slot that was
   empty at the time requires reloading the integration for the new entity to
   appear.
-- The printer's own serial number and firmware version come from
-  `/cdm/system/v1/identity`, which has never been observed in the wild. When it
-  is absent, the device simply shows fewer details; nothing else changes. If
-  your printer *does* answer on that endpoint, its payload would be a welcome
-  issue report.
+- The model, SKU, serial number and firmware version come from
+  `/cdm/system/v1/identity`. If a model does not offer that endpoint, the
+  integration falls back to the device-scoped paths advertised in
+  `servicesDiscovery`, and finally to the model name announced over mDNS. When
+  none of it answers, the device simply shows fewer details; nothing else
+  changes.
+
+  Note that `makeAndModel` is an **object**, not a string, and that the
+  `deviceUuid` here differs from the mDNS/IPP UUID used as the entry's
+  `unique_id`. Confirmed payload on a Color LaserJet Pro MFP 3302:
+
+  ```json
+  {
+    "makeAndModel": {
+      "base": "HP Color LaserJet Pro MFP 3302",
+      "family": "HP Color LaserJet Pro MFP 3301-3304 3388",
+      "name": "HP Color LaserJet Pro MFP 3302"
+    },
+    "manufacturer": "HP",
+    "productNumber": "499Q7A",
+    "skuIdentifier": "3302fdn",
+    "serialNumber": "VNF1905302",
+    "firmwareVersion": "6.28.3.30-202606111700",
+    "firmwareRelease": "6.28.3",
+    "deviceUuid": "685fc684-...",
+    "version": "1.6.0"
+  }
+  ```
+
+  Payloads from other models are welcome as issues.
 
 ## Troubleshooting
 

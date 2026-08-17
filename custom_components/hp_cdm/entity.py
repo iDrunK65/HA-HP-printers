@@ -35,6 +35,7 @@ class HpCdmEntity(CoordinatorEntity[HpCdmCoordinator]):
             identifiers={(DOMAIN, base_id)},
             manufacturer=MANUFACTURER,
             model=device.model,
+            model_id=device.model_id,
             name=device.name,
             serial_number=device.serial_number,
             sw_version=device.firmware,

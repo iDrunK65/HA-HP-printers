@@ -17,6 +17,7 @@ from .api import HpCdmClient, HpCdmError
 from .const import (
     CONF_FIRMWARE,
     CONF_MODEL,
+    CONF_MODEL_ID,
     CONF_SERIAL,
     DEFAULT_DEVICE_NAME,
     ENDPOINT_IDENTITY,
@@ -32,6 +33,7 @@ from .coordinator import (
 )
 from .util import (
     IDENTITY_FIRMWARE_KEYS,
+    IDENTITY_MODEL_ID_KEYS,
     IDENTITY_MODEL_KEYS,
     IDENTITY_SERIAL_KEYS,
     collect_cdm_paths,
@@ -89,6 +91,7 @@ async def _async_resolve_device(
     every failure just means a less detailed device page.
     """
     model = entry.data.get(CONF_MODEL)
+    model_id = entry.data.get(CONF_MODEL_ID)
     serial = entry.data.get(CONF_SERIAL)
     firmware = entry.data.get(CONF_FIRMWARE)
 
@@ -98,10 +101,16 @@ async def _async_resolve_device(
     if not model or not serial:
         found = await _async_probe_identity(client)
         model = model or found.get("model")
+        model_id = model_id or found.get("model_id")
         serial = serial or found.get("serial")
         firmware = firmware or found.get("firmware")
 
-        updates = {CONF_MODEL: model, CONF_SERIAL: serial, CONF_FIRMWARE: firmware}
+        updates = {
+            CONF_MODEL: model,
+            CONF_MODEL_ID: model_id,
+            CONF_SERIAL: serial,
+            CONF_FIRMWARE: firmware,
+        }
         if any(value and entry.data.get(key) != value for key, value in updates.items()):
             hass.config_entries.async_update_entry(
                 entry, data={**entry.data, **{k: v for k, v in updates.items() if v}}
@@ -110,6 +119,7 @@ async def _async_resolve_device(
     return HpCdmDeviceInfo(
         name=model or entry.title or DEFAULT_DEVICE_NAME,
         model=model,
+        model_id=model_id,
         serial_number=serial,
         firmware=firmware,
     )
@@ -150,6 +160,7 @@ async def _async_probe_identity(client: HpCdmClient) -> dict[str, str]:
 
         for field, keys in (
             ("model", IDENTITY_MODEL_KEYS),
+            ("model_id", IDENTITY_MODEL_ID_KEYS),
             ("serial", IDENTITY_SERIAL_KEYS),
             ("firmware", IDENTITY_FIRMWARE_KEYS),
         ):

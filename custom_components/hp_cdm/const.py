@@ -8,9 +8,9 @@ from typing import Final
 DOMAIN: Final = "hp_cdm"
 MANUFACTURER: Final = "HP"
 
-# Shown when /cdm/system/v1/identity is unavailable or does not expose a model
-# name. The endpoint has never been observed on the reference hardware, so the
-# integration must never depend on it.
+# Shown when /cdm/system/v1/identity is unavailable or exposes no model name.
+# The endpoint answers anonymously on the reference hardware, but other models
+# may not offer it at all, so the integration must never depend on it.
 DEFAULT_DEVICE_NAME: Final = "HP Printer"
 
 # Config entry keys. CONF_HOST comes from homeassistant.const.
@@ -18,6 +18,7 @@ CONF_UUID: Final = "uuid"
 CONF_MODEL: Final = "model"
 # Identity fields are cached on the config entry once resolved, so a printer
 # that is asleep or slow at restart still shows a complete device page.
+CONF_MODEL_ID: Final = "model_id"
 CONF_SERIAL: Final = "serial_number"
 CONF_FIRMWARE: Final = "firmware"
 

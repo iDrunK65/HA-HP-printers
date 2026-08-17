@@ -44,6 +44,7 @@ class HpCdmDeviceInfo:
 
     name: str
     model: str | None
+    model_id: str | None
     serial_number: str | None
     firmware: str | None
 
