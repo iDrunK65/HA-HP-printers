@@ -95,6 +95,38 @@ ratio.
 **Binary sensors** — `problem` (on as soon as an alert of severity *error* or
 worse is present, with the reason in attributes) and `connectivity`.
 
+### Dashboard card
+
+The device page groups entities the way Home Assistant sees fit, which the
+integration does not control. To get a grouped card with separators, add an
+`entities` card with `section` rows:
+
+```yaml
+type: entities
+title: Printer
+show_header_toggle: false
+entities:
+  - entity: sensor.PRINTER_printer_status
+  - entity: binary_sensor.PRINTER_problem
+  - type: section
+    label: Cartridges
+  - entity: sensor.PRINTER_black_cartridge
+  - entity: sensor.PRINTER_cyan_cartridge
+  - entity: sensor.PRINTER_magenta_cartridge
+  - entity: sensor.PRINTER_yellow_cartridge
+  - type: section
+    label: Counters
+  - entity: sensor.PRINTER_total_impressions
+  - entity: sensor.PRINTER_sheets
+  - entity: sensor.PRINTER_scanned_images
+  - entity: sensor.PRINTER_color_ratio
+  - entity: sensor.PRINTER_duplex_ratio
+```
+
+Replace `PRINTER` with the slug of your device name (visible in
+*Developer tools → States*). Use `- type: divider` instead of `- type: section`
+for an unlabelled separator.
+
 ### Disabled by default
 
 Everything fax-related, blank sides, network folder jobs, and the diagnostic

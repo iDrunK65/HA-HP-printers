@@ -14,7 +14,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import HpCdmClient, HpCdmError
-from .const import CONF_MODEL, DEFAULT_DEVICE_NAME, ENDPOINT_IDENTITY
+from .const import (
+    CONF_FIRMWARE,
+    CONF_MODEL,
+    CONF_SERIAL,
+    DEFAULT_DEVICE_NAME,
+    ENDPOINT_IDENTITY,
+    ENDPOINT_SERVICES_DISCOVERY,
+)
 from .coordinator import (
     HpCdmConfigEntry,
     HpCdmData,
@@ -27,7 +34,9 @@ from .util import (
     IDENTITY_FIRMWARE_KEYS,
     IDENTITY_MODEL_KEYS,
     IDENTITY_SERIAL_KEYS,
+    collect_cdm_paths,
     find_value,
+    identity_candidates,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HpCdmConfigEntry) -> boo
     session = async_get_clientsession(hass, verify_ssl=False)
     client = HpCdmClient(session, entry.data[CONF_HOST])
 
-    device = await _async_resolve_device(client, entry)
+    device = await _async_resolve_device(hass, client, entry)
 
     status_coordinator = HpCdmStatusCoordinator(hass, entry, client)
     supply_coordinator = HpCdmSupplyCoordinator(hass, entry, client)
@@ -72,31 +81,83 @@ async def async_unload_entry(hass: HomeAssistant, entry: HpCdmConfigEntry) -> bo
 
 
 async def _async_resolve_device(
-    client: HpCdmClient, entry: HpCdmConfigEntry
+    hass: HomeAssistant, client: HpCdmClient, entry: HpCdmConfigEntry
 ) -> HpCdmDeviceInfo:
     """Build the device identity, degrading gracefully at every step.
 
-    Setup must never depend on the identity endpoint: it is optional, its
-    schema is unverified, and the model name discovered over mDNS is a
-    perfectly good fallback.
+    Setup must never depend on any of this: every request here is optional and
+    every failure just means a less detailed device page.
     """
-    identity: dict | None = None
-    try:
-        identity = await client.async_get(ENDPOINT_IDENTITY, required=False)
-    except HpCdmError as err:
-        # A single flaky optional request must not abort the whole setup.
-        _LOGGER.debug("Could not read %s: %s", ENDPOINT_IDENTITY, err)
+    model = entry.data.get(CONF_MODEL)
+    serial = entry.data.get(CONF_SERIAL)
+    firmware = entry.data.get(CONF_FIRMWARE)
 
-    model = find_value(identity, IDENTITY_MODEL_KEYS) if identity else None
-    serial = find_value(identity, IDENTITY_SERIAL_KEYS) if identity else None
-    firmware = find_value(identity, IDENTITY_FIRMWARE_KEYS) if identity else None
+    # Probing costs requests on hardware that dislikes them, so only do it
+    # while something is still missing; once resolved the values are cached on
+    # the config entry.
+    if not model or not serial:
+        found = await _async_probe_identity(client)
+        model = model or found.get("model")
+        serial = serial or found.get("serial")
+        firmware = firmware or found.get("firmware")
 
-    # The zeroconf "ty" TXT record already carries a human-readable model.
-    model = str(model) if model else entry.data.get(CONF_MODEL)
+        updates = {CONF_MODEL: model, CONF_SERIAL: serial, CONF_FIRMWARE: firmware}
+        if any(value and entry.data.get(key) != value for key, value in updates.items()):
+            hass.config_entries.async_update_entry(
+                entry, data={**entry.data, **{k: v for k, v in updates.items() if v}}
+            )
 
     return HpCdmDeviceInfo(
         name=model or entry.title or DEFAULT_DEVICE_NAME,
         model=model,
-        serial_number=str(serial) if serial else None,
-        firmware=str(firmware) if firmware else None,
+        serial_number=serial,
+        firmware=firmware,
     )
+
+
+async def _async_probe_identity(client: HpCdmClient) -> dict[str, str]:
+    """Look for the model, serial and firmware across the CDM tree.
+
+    ``/cdm/system/v1/identity`` is tried first, then any *advertised* path that
+    looks device-scoped. Candidate URLs are never invented: they are read back
+    from servicesDiscovery, which is the firmware's own index of itself. That
+    matters because guessed URLs on this API are how you end up addressing
+    something you did not mean to.
+    """
+    found: dict[str, str] = {}
+    candidates = [ENDPOINT_IDENTITY]
+
+    try:
+        services = await client.async_get(ENDPOINT_SERVICES_DISCOVERY, required=False)
+    except HpCdmError as err:
+        _LOGGER.debug("Could not read %s: %s", ENDPOINT_SERVICES_DISCOVERY, err)
+    else:
+        candidates += [
+            path
+            for path in identity_candidates(collect_cdm_paths(services))
+            if path not in candidates
+        ]
+
+    for path in candidates:
+        try:
+            payload = await client.async_get(path, required=False)
+        except HpCdmError as err:
+            # A single flaky optional request must not abort the whole setup.
+            _LOGGER.debug("Could not read %s: %s", path, err)
+            continue
+        if not payload:
+            continue
+
+        for field, keys in (
+            ("model", IDENTITY_MODEL_KEYS),
+            ("serial", IDENTITY_SERIAL_KEYS),
+            ("firmware", IDENTITY_FIRMWARE_KEYS),
+        ):
+            if field not in found and (value := find_value(payload, keys)):
+                found[field] = str(value).strip()
+
+        if "model" in found and "serial" in found:
+            break
+
+    _LOGGER.debug("Identity probe over %s resolved %s", candidates, found)
+    return found

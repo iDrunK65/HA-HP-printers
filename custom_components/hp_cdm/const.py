@@ -16,6 +16,10 @@ DEFAULT_DEVICE_NAME: Final = "HP Printer"
 # Config entry keys. CONF_HOST comes from homeassistant.const.
 CONF_UUID: Final = "uuid"
 CONF_MODEL: Final = "model"
+# Identity fields are cached on the config entry once resolved, so a printer
+# that is asleep or slow at restart still shows a complete device page.
+CONF_SERIAL: Final = "serial_number"
+CONF_FIRMWARE: Final = "firmware"
 
 # --- Endpoints -------------------------------------------------------------
 # Every one of these is readable anonymously on the reference firmware

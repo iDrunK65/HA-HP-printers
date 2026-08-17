@@ -144,6 +144,77 @@ def find_value(data: Any, keys: tuple[str, ...]) -> Any:
     return None
 
 
+_CDM_PATH = re.compile(r"^/cdm/[A-Za-z0-9/_.-]+$")
+
+# A path must look like device identity...
+_IDENTITY_HINTS = ("identity", "configuration", "productconfig", "deviceinfo")
+# ...and belong to a device-scoped service, which is what keeps
+# /cdm/power/v1/configuration and /cdm/firewall/v2/configuration out.
+_IDENTITY_SCOPES = ("system", "product", "device")
+# Defence in depth. Nothing here is ever reachable anyway, since the client
+# only implements GET, but a probe must not even *address* a resource whose
+# name suggests it mutates the printer.
+_NEVER_PROBE = (
+    "reset",
+    "reboot",
+    "erase",
+    "format",
+    "password",
+    "private",
+    "devtest",
+    "firmwareupdate",
+    "shutdown",
+)
+
+
+def collect_cdm_paths(data: Any) -> list[str]:
+    """Collect every /cdm/... path advertised anywhere inside a payload.
+
+    servicesDiscovery indexes the whole firmware, but its exact shape is not
+    documented, so walk it blindly and keep anything that looks like a link
+    rather than assuming a structure.
+    """
+    found: list[str] = []
+
+    def _walk(node: Any) -> None:
+        if isinstance(node, dict):
+            for value in node.values():
+                _walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                _walk(value)
+        elif isinstance(node, str) and _CDM_PATH.match(node) and node not in found:
+            found.append(node)
+
+    _walk(data)
+    return found
+
+
+def identity_candidates(paths: list[str], *, limit: int = 3) -> list[str]:
+    """Rank the advertised paths most likely to describe the device.
+
+    Returns at most ``limit`` of them: this hardware is fragile, and probing
+    is only ever worth a couple of extra requests at setup.
+    """
+
+    def _rank(path: str) -> int:
+        lowered = path.lower()
+        if "identity" in lowered:
+            return 0
+        if "productconfig" in lowered or "deviceinfo" in lowered:
+            return 1
+        return 2
+
+    selected = [
+        path
+        for path in paths
+        if any(hint in path.lower() for hint in _IDENTITY_HINTS)
+        and any(scope in path.lower() for scope in _IDENTITY_SCOPES)
+        and not any(danger in path.lower() for danger in _NEVER_PROBE)
+    ]
+    return sorted(selected, key=_rank)[:limit]
+
+
 @dataclass(frozen=True, kw_only=True)
 class ParsedAlert:
     """A single printer alert, normalised for display."""

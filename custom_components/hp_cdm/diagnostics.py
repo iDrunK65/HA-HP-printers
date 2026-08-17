@@ -8,7 +8,7 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_UUID
+from .const import CONF_SERIAL, CONF_UUID
 from .coordinator import HpCdmConfigEntry
 
 # Cartridge serial numbers, the printer serial and anything that locates the
@@ -16,6 +16,7 @@ from .coordinator import HpCdmConfigEntry
 # issues.
 TO_REDACT = {
     CONF_HOST,
+    CONF_SERIAL,
     CONF_UUID,
     "adminurl",
     "deviceUuid",
