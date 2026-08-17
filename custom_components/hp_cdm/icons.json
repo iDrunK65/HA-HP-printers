@@ -1,0 +1,113 @@
+{
+  "entity": {
+    "sensor": {
+      "impressions_total": {
+        "default": "mdi:printer"
+      },
+      "impressions_mono": {
+        "default": "mdi:invert-colors-off"
+      },
+      "impressions_color": {
+        "default": "mdi:invert-colors"
+      },
+      "impressions_blank": {
+        "default": "mdi:file-outline"
+      },
+      "print_impressions": {
+        "default": "mdi:printer-outline"
+      },
+      "copy_impressions": {
+        "default": "mdi:content-copy"
+      },
+      "fax_impressions": {
+        "default": "mdi:fax"
+      },
+      "sheets_total": {
+        "default": "mdi:file-document-multiple-outline"
+      },
+      "sheets_simplex": {
+        "default": "mdi:file-document-outline"
+      },
+      "sheets_duplex": {
+        "default": "mdi:book-open-page-variant-outline"
+      },
+      "scan_total": {
+        "default": "mdi:scanner"
+      },
+      "scan_send": {
+        "default": "mdi:send-outline"
+      },
+      "scan_copy": {
+        "default": "mdi:image-multiple-outline"
+      },
+      "scan_adf": {
+        "default": "mdi:tray-full"
+      },
+      "scan_fax": {
+        "default": "mdi:fax"
+      },
+      "jobs_print": {
+        "default": "mdi:printer-check"
+      },
+      "jobs_copy": {
+        "default": "mdi:content-copy"
+      },
+      "jobs_email": {
+        "default": "mdi:email-outline"
+      },
+      "jobs_network_folder": {
+        "default": "mdi:folder-network-outline"
+      },
+      "jobs_fax_sent": {
+        "default": "mdi:fax"
+      },
+      "jobs_fax_received": {
+        "default": "mdi:fax"
+      },
+      "color_ratio": {
+        "default": "mdi:palette"
+      },
+      "duplex_ratio": {
+        "default": "mdi:content-duplicate"
+      },
+      "printer_status": {
+        "default": "mdi:printer-settings"
+      },
+      "alert_status": {
+        "default": "mdi:alert-box-outline",
+        "state": {
+          "ok": "mdi:check-circle-outline",
+          "warning": "mdi:alert-outline",
+          "error": "mdi:alert-circle"
+        }
+      },
+      "alert_count": {
+        "default": "mdi:counter"
+      },
+      "power_cycle_count": {
+        "default": "mdi:restart"
+      },
+      "available_memory": {
+        "default": "mdi:memory"
+      },
+      "sleep_timeout": {
+        "default": "mdi:sleep"
+      },
+      "supply_k": {
+        "default": "mdi:water"
+      },
+      "supply_c": {
+        "default": "mdi:water"
+      },
+      "supply_m": {
+        "default": "mdi:water"
+      },
+      "supply_y": {
+        "default": "mdi:water"
+      },
+      "supply_generic": {
+        "default": "mdi:water-outline"
+      }
+    }
+  }
+}
